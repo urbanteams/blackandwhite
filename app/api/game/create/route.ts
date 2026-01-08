@@ -25,13 +25,15 @@ export async function POST(request: NextRequest) {
     const roomCode = await generateRoomCode();
 
     // Create game
+    // For AI games, player2Id is null (AI opponent is not a real user)
+    // The gameMode field indicates this is an AI game
     const game = await prisma.game.create({
       data: {
         roomCode,
         gameMode,
         status: gameMode === "AI" ? "IN_PROGRESS" : "WAITING",
         player1Id: session.userId,
-        player2Id: gameMode === "AI" ? "AI_PLAYER" : null,
+        player2Id: null, // AI games have no second player user
         currentTurn: session.userId, // Player 1 always goes first
         currentRound: 1,
       },
