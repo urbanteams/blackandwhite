@@ -101,6 +101,16 @@ export function GameLobby() {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      router.push("/auth/login");
+      router.refresh();
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const badges = {
       WAITING: "bg-yellow-100 text-yellow-800",
@@ -115,11 +125,18 @@ export function GameLobby() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-12 px-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-gray-800 mb-4">Black & White</h1>
-          <p className="text-xl text-gray-600">
-            A strategic tile game from "The Genius"
-          </p>
+        <div className="mb-12">
+          <div className="flex justify-end mb-4">
+            <Button variant="outline" size="sm" onClick={handleLogout}>
+              Logout
+            </Button>
+          </div>
+          <div className="text-center">
+            <h1 className="text-5xl font-bold text-gray-800 mb-4">Black & White</h1>
+            <p className="text-xl text-gray-600">
+              A strategic tile game from "The Genius"
+            </p>
+          </div>
         </div>
 
         {/* Error Message */}
