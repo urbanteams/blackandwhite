@@ -98,11 +98,11 @@ export function GameBoard() {
         {isGameOver && (
           <Card className={`mb-6 ${game.status === "ABANDONED" ? "bg-orange-50 border-orange-300" : "bg-green-50 border-green-300"}`}>
             <CardContent className="py-6 text-center">
-              <h2 className="text-3xl font-bold mb-2">
+              <h2 className="text-3xl font-bold mb-2 text-black">
                 {game.status === "ABANDONED" ? "🏳️ Game Abandoned" : "🎉 Game Complete!"}
               </h2>
               {game.winnerId && (
-                <p className="text-xl text-gray-700">
+                <p className="text-xl text-black">
                   {players.player1?.id === game.winnerId && players.player1?.isMe && "You won!"}
                   {players.player2?.id === game.winnerId && players.player2?.isMe && "You won!"}
                   {players.player1?.id === game.winnerId && !players.player1?.isMe && `${players.player1.email} won!`}
@@ -110,7 +110,7 @@ export function GameBoard() {
                 </p>
               )}
               {!game.winnerId && game.status === "COMPLETED" && (
-                <p className="text-xl text-gray-700">It's a tie!</p>
+                <p className="text-xl text-black">It's a tie!</p>
               )}
               <Button onClick={() => window.location.href = "/"} className="mt-4">
                 Return to Lobby
@@ -135,7 +135,7 @@ export function GameBoard() {
               opponentTilesCount={playerState.opponentTilesCount}
             />
 
-            {playerState.isMyTurn && playerState.timeRemaining !== null && !isGameOver && (
+            {playerState.isMyTurn && playerState.timeRemaining !== null && !isGameOver && playerState.myTiles.length > 0 && (
               <GameTimer timeRemaining={playerState.timeRemaining} />
             )}
 
@@ -174,7 +174,7 @@ export function GameBoard() {
 
           {/* Right Column - Round History */}
           <div>
-            <RoundHistory completedRounds={completedRounds} />
+            <RoundHistory completedRounds={completedRounds} gameComplete={isGameOver} />
           </div>
         </div>
       </div>

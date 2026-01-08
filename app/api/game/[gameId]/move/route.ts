@@ -198,11 +198,14 @@ export async function POST(
         });
       } else {
         // Advance to next round
+        // Winner of previous round goes first (or player1 if tie)
+        const nextTurn = roundWinnerId || game.player1Id;
+
         await prisma.game.update({
           where: { id: gameId },
           data: {
             currentRound: game.currentRound + 1,
-            currentTurn: game.player1Id, // Player 1 always starts each round
+            currentTurn: nextTurn,
           },
         });
 
@@ -337,11 +340,57 @@ export async function POST(
           });
         } else {
           // Advance to next round
+          // Winner of previous round goes first (or player1 if tie)
+          const nextTurn = roundWinnerId || game.player1Id;
+
+          // If AI won, it goes first in next round - generate AI move immediately
+          if (nextTurn === aiUser.id) {
+            const aiUsedTilesForNextRound = getUsedTiles(allMovesWithAI, aiUser.id);
+            const aiRemainingTilesForNextRound = getRemainingTiles(aiUsedTilesForNextRound);
+
+            if (aiRemainingTilesForNextRound.length > 0) {
+              const nextAiTile = generateAIMove(aiRemainingTilesForNextRound);
+
+              // Create AI move for next round
+              await prisma.move.create({
+                data: {
+                  gameId,
+                  round: game.currentRound + 1,
+                  playerId: aiUser.id,
+                  tileNumber: nextAiTile,
+                },
+              });
+
+              // Update game - AI has played, now it's human's turn
+              await prisma.game.update({
+                where: { id: gameId },
+                data: {
+                  currentRound: game.currentRound + 1,
+                  currentTurn: session.userId,
+                },
+              });
+
+              return NextResponse.json({
+                success: true,
+                roundComplete: true,
+                gameComplete: false,
+                roundWinner: roundWinnerId,
+                aiMove: {
+                  tileNumber: aiTileNumber,
+                },
+                nextRoundAiMove: {
+                  tileNumber: nextAiTile,
+                },
+              });
+            }
+          }
+
+          // Human won or tie - human goes first
           await prisma.game.update({
             where: { id: gameId },
             data: {
               currentRound: game.currentRound + 1,
-              currentTurn: game.player1Id,
+              currentTurn: nextTurn,
             },
           });
 
