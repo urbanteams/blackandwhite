@@ -118,7 +118,7 @@ export async function generateRoomCode(): Promise<string> {
  * @returns True if game is complete
  */
 export function isGameComplete(round: number): boolean {
-  return round > 9;
+  return round >= 9;
 }
 
 /**
