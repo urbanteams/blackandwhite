@@ -27,7 +27,7 @@ export function RoundHistory({ completedRounds, gameComplete }: RoundHistoryProp
       <CardHeader>
         <h3 className="text-lg font-semibold text-gray-800">Round History</h3>
       </CardHeader>
-      <CardContent className="max-h-64 overflow-y-auto">
+      <CardContent className="max-h-[600px] overflow-y-auto">
         <div className="space-y-2">
           {completedRounds.map(({ round, myTile, opponentTile, winner }) => {
             const myColor = getTileColor(myTile);

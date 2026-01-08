@@ -166,12 +166,14 @@ export async function POST(
         const player1Score = calculateGameScore(
           allMoves,
           game.player1Id,
-          game.player2Id || "AI"
+          game.player1Id,
+          game.player2Id
         );
         const player2Score = calculateGameScore(
           allMoves,
           game.player2Id || "AI",
-          game.player1Id
+          game.player1Id,
+          game.player2Id
         );
 
         const gameWinnerId =
@@ -305,12 +307,14 @@ export async function POST(
           const humanScore = calculateGameScore(
             allMovesWithAI,
             session.userId,
+            game.player1Id,
             aiUser.id
           );
           const aiScore = calculateGameScore(
             allMovesWithAI,
             aiUser.id,
-            session.userId
+            game.player1Id,
+            aiUser.id
           );
 
           const gameWinnerId =

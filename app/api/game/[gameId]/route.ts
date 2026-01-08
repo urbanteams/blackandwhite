@@ -109,7 +109,12 @@ export async function GET(
 
     // Get completed rounds
     const completedRounds = [];
-    for (let round = 1; round < game.currentRound; round++) {
+    // Include current round if game is complete, otherwise exclude it
+    const maxRound = game.status === "COMPLETED" || game.status === "ABANDONED"
+      ? game.currentRound
+      : game.currentRound - 1;
+
+    for (let round = 1; round <= maxRound; round++) {
       const roundMoves = game.moves.filter((m) => m.round === round);
       const myRoundMove = roundMoves.find((m) => m.playerId === myId);
       const oppRoundMove = roundMoves.find((m) => m.playerId !== myId);
