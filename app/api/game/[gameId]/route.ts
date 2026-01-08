@@ -146,10 +146,25 @@ export async function GET(
       const elapsed = Date.now() - lastMoveTime;
       timeRemaining = Math.max(0, 60 - Math.floor(elapsed / 1000)); // 60 seconds per move
 
-      // Check if timeout occurred (server should handle this, but calculate for client)
-      if (timeRemaining === 0 && game.status === "IN_PROGRESS") {
-        // Timeout occurred - the game should be ended by the move endpoint
-        // For now, just show 0 time remaining
+      // Check if timeout occurred - auto-forfeit current player
+      if (elapsed > 60000) {
+        // Current player timed out - opponent wins
+        const opponentId = game.currentTurn === game.player1Id
+          ? game.player2Id
+          : game.player1Id;
+
+        await prisma.game.update({
+          where: { id: gameId },
+          data: {
+            status: "COMPLETED",
+            winnerId: opponentId,
+          },
+        });
+
+        // Update the game object for the response
+        game.status = "COMPLETED";
+        game.winnerId = opponentId;
+        timeRemaining = 0;
       }
     }
 

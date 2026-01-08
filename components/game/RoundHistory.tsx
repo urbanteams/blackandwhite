@@ -50,30 +50,26 @@ export function RoundHistory({ completedRounds, gameComplete }: RoundHistoryProp
                 <div className="flex items-center space-x-3">
                   <span className="text-sm font-semibold text-gray-600">R{round}</span>
 
-                  {gameComplete ? (
-                    <>
-                      {/* Show tile numbers only when game is complete */}
-                      <div
-                        className={`
-                          w-10 h-10 rounded flex items-center justify-center font-bold text-sm
-                          ${myColor === "black" ? "bg-gray-900 text-white" : "bg-white text-gray-900 border-2 border-gray-300"}
-                        `}
-                      >
-                        {myTile}
-                      </div>
+                  {/* Always show tile colors */}
+                  <div
+                    className={`
+                      w-10 h-10 rounded flex items-center justify-center font-bold text-sm
+                      ${myColor === "black" ? "bg-gray-900 text-white" : "bg-white text-gray-900 border-2 border-gray-300"}
+                    `}
+                  >
+                    {gameComplete ? myTile : ""}
+                  </div>
 
-                      <span className="text-gray-400">vs</span>
+                  <span className="text-gray-400">vs</span>
 
-                      <div
-                        className={`
-                          w-10 h-10 rounded flex items-center justify-center font-bold text-sm
-                          ${oppColor === "black" ? "bg-gray-900 text-white" : "bg-white text-gray-900 border-2 border-gray-300"}
-                        `}
-                      >
-                        {opponentTile}
-                      </div>
-                    </>
-                  ) : null}
+                  <div
+                    className={`
+                      w-10 h-10 rounded flex items-center justify-center font-bold text-sm
+                      ${oppColor === "black" ? "bg-gray-900 text-white" : "bg-white text-gray-900 border-2 border-gray-300"}
+                    `}
+                  >
+                    {gameComplete ? opponentTile : ""}
+                  </div>
                 </div>
 
                 {/* Winner Badge */}

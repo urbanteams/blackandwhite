@@ -200,8 +200,16 @@ export async function POST(
         });
       } else {
         // Advance to next round
-        // Winner of previous round goes first (or player1 if tie)
-        const nextTurn = roundWinnerId || game.player1Id;
+        // Winner of previous round goes first
+        // If tie, whoever played first this round plays first next round
+        let nextTurn = roundWinnerId;
+        if (!nextTurn) {
+          // Tie - determine who moved first this round
+          const firstMove = updatedCurrentRoundMoves.sort(
+            (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+          )[0];
+          nextTurn = firstMove.playerId;
+        }
 
         await prisma.game.update({
           where: { id: gameId },
@@ -344,8 +352,19 @@ export async function POST(
           });
         } else {
           // Advance to next round
-          // Winner of previous round goes first (or player1 if tie)
-          const nextTurn = roundWinnerId || game.player1Id;
+          // Winner of previous round goes first
+          // If tie, whoever played first this round plays first next round
+          let nextTurn = roundWinnerId;
+          if (!nextTurn) {
+            // Tie - determine who moved first this round
+            const currentRoundMovesWithAI = allMovesWithAI.filter(
+              (m) => m.round === game.currentRound
+            );
+            const firstMove = currentRoundMovesWithAI.sort(
+              (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+            )[0];
+            nextTurn = firstMove.playerId;
+          }
 
           // If AI won, it goes first in next round - generate AI move immediately
           if (nextTurn === aiUser.id) {
