@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  player1Games Game[]  @relation("Player1Games")
+  player2Games Game[]  @relation("Player2Games")
+  moves        Move[]
+}
+
+model Game {
+  id            String   @id @default(cuid())
+  roomCode      String   @unique
+  gameMode      String   // "AI" | "MULTIPLAYER"
+  status        String   // "WAITING" | "IN_PROGRESS" | "COMPLETED" | "ABANDONED"
+  currentTurn   String?  // userId
+  currentRound  Int      @default(1)
+  winnerId      String?
+  player1Id     String
+  player2Id     String?  // null for AI games
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  player1       User     @relation("Player1Games", fields: [player1Id], references: [id], onDelete: Cascade)
+  player2       User?    @relation("Player2Games", fields: [player2Id], references: [id], onDelete: Cascade)
+  moves         Move[]
+
+  @@index([roomCode])
+  @@index([status])
+  @@index([player1Id])
+  @@index([player2Id])
+}
+
+model Move {
+  id           String   @id @default(cuid())
+  gameId       String
+  round        Int
+  playerId     String
+  tileNumber   Int      // 0-8
+  createdAt    DateTime @default(now())
+
+  game         Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  player       User     @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@index([gameId, round])
+  @@index([playerId])
+}
