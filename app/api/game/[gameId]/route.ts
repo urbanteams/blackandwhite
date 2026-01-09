@@ -30,10 +30,10 @@ export async function GET(
           orderBy: { createdAt: "asc" },
         },
         player1: {
-          select: { id: true, email: true },
+          select: { id: true, email: true, username: true },
         },
         player2: {
-          select: { id: true, email: true },
+          select: { id: true, email: true, username: true },
         },
       },
     });
@@ -76,11 +76,13 @@ export async function GET(
     const opponentRemainingTiles = getRemainingTiles(opponentUsedTiles);
 
     // Calculate scores
-    const myScore = opponentId
-      ? calculateGameScore(game.moves, myId, game.player1Id, opponentId)
+    // For multiplayer games, use actual player IDs. For AI games, use the AI opponent ID
+    const player2IdForScore = isAIGame ? opponentId : game.player2Id;
+    const myScore = opponentId && player2IdForScore
+      ? calculateGameScore(game.moves, myId, game.player1Id, player2IdForScore)
       : 0;
-    const opponentScore = opponentId
-      ? calculateGameScore(game.moves, opponentId, game.player1Id, opponentId)
+    const opponentScore = opponentId && player2IdForScore
+      ? calculateGameScore(game.moves, opponentId, game.player1Id, player2IdForScore)
       : 0;
 
     // Get current round moves
@@ -184,6 +186,7 @@ export async function GET(
           ? {
               id: game.player1.id,
               email: game.player1.email,
+              username: game.player1.username || game.player1.email,
               isMe: game.player1.id === myId,
             }
           : null,
@@ -193,11 +196,13 @@ export async function GET(
               ? {
                   id: game.player2.id,
                   email: game.player2.email,
+                  username: game.player2.username || game.player2.email,
                   isMe: game.player2.id === myId,
                 }
               : {
                   id: "AI",
                   email: "AI Opponent",
+                  username: "AI Opponent",
                   isMe: false,
                 }
             : null,

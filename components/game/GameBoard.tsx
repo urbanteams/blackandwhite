@@ -7,7 +7,6 @@ import { ScoreDisplay } from "./ScoreDisplay";
 import { GameTimer } from "./GameTimer";
 import { TurnIndicator } from "./TurnIndicator";
 import { RoundHistory } from "./RoundHistory";
-import { OpponentInfo } from "./OpponentInfo";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 
@@ -79,8 +78,8 @@ export function GameBoard() {
 
   const { game, players, playerState, currentRoundMoves, completedRounds } = gameState;
 
-  const myName = players.player1?.isMe ? players.player1.email : players.player2?.email || "You";
-  const opponentName = players.player1?.isMe ? (players.player2?.email || "AI Opponent") : (players.player1?.email || "Opponent");
+  const myName = players.player1?.isMe ? (players.player1.username || players.player1.email) : (players.player2?.username || players.player2?.email || "You");
+  const opponentName = players.player1?.isMe ? (players.player2?.username || players.player2?.email || "AI Opponent") : (players.player1?.username || players.player1?.email || "Opponent");
 
   const isGameOver = game.status === "COMPLETED" || game.status === "ABANDONED";
   const canMove = playerState.isMyTurn && !currentRoundMoves.myMove && !isGameOver && !submitting;
@@ -105,8 +104,8 @@ export function GameBoard() {
                 <p className="text-xl text-black">
                   {players.player1?.id === game.winnerId && players.player1?.isMe && "You won!"}
                   {players.player2?.id === game.winnerId && players.player2?.isMe && "You won!"}
-                  {players.player1?.id === game.winnerId && !players.player1?.isMe && `${players.player1.email} won!`}
-                  {players.player2?.id === game.winnerId && !players.player2?.isMe && `${players.player2?.email} won!`}
+                  {players.player1?.id === game.winnerId && !players.player1?.isMe && `${players.player1.username || players.player1.email} won!`}
+                  {players.player2?.id === game.winnerId && !players.player2?.isMe && `${players.player2?.username || players.player2?.email} won!`}
                 </p>
               )}
               {!game.winnerId && game.status === "COMPLETED" && (
@@ -128,11 +127,6 @@ export function GameBoard() {
               myName={myName}
               opponentName={opponentName}
               currentRound={game.currentRound}
-            />
-
-            <OpponentInfo
-              opponentName={opponentName}
-              opponentTilesCount={playerState.opponentTilesCount}
             />
 
             {playerState.isMyTurn && playerState.timeRemaining !== null && !isGameOver && playerState.myTiles.length > 0 && (

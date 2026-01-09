@@ -149,6 +149,22 @@ export async function POST(
         throw new Error("Invalid round state");
       }
 
+      // For AI games, get the AI user
+      let aiUser = null;
+      if (game.gameMode === "AI") {
+        aiUser = await prisma.user.findUnique({
+          where: { email: "ai@system.local" },
+        });
+        if (!aiUser) {
+          aiUser = await prisma.user.create({
+            data: {
+              email: "ai@system.local",
+              password: "NOT_A_REAL_PASSWORD",
+            },
+          });
+        }
+      }
+
       const roundWinner = determineRoundWinner(
         player1Move.tileNumber,
         player2Move.tileNumber
@@ -157,30 +173,31 @@ export async function POST(
         roundWinner === 1
           ? game.player1Id
           : roundWinner === 2
-            ? game.player2Id
+            ? (game.gameMode === "AI" ? aiUser?.id : game.player2Id)
             : null;
 
       // Check if game is complete (9 rounds played)
       if (isGameComplete(game.currentRound)) {
         // Game complete - determine overall winner
+        const player2IdForScore = game.gameMode === "AI" ? aiUser?.id : game.player2Id;
         const player1Score = calculateGameScore(
           allMoves,
           game.player1Id,
           game.player1Id,
-          game.player2Id
+          player2IdForScore || null
         );
         const player2Score = calculateGameScore(
           allMoves,
-          game.player2Id || "AI",
+          player2IdForScore || "AI",
           game.player1Id,
-          game.player2Id
+          player2IdForScore || null
         );
 
         const gameWinnerId =
           player1Score > player2Score
             ? game.player1Id
             : player2Score > player1Score
-              ? game.player2Id
+              ? player2IdForScore
               : null; // Tie
 
         await prisma.game.update({
@@ -211,6 +228,45 @@ export async function POST(
           nextTurn = firstMove.playerId;
         }
 
+        // For AI games, if AI won (or goes first), generate AI move for next round
+        if (game.gameMode === "AI" && aiUser && nextTurn === aiUser.id) {
+          const aiUsedTiles = getUsedTiles(allMoves, aiUser.id);
+          const aiRemainingTiles = getRemainingTiles(aiUsedTiles);
+
+          if (aiRemainingTiles.length > 0) {
+            const nextAiTile = generateAIMove(aiRemainingTiles);
+
+            // Create AI move for next round
+            await prisma.move.create({
+              data: {
+                gameId,
+                round: game.currentRound + 1,
+                playerId: aiUser.id,
+                tileNumber: nextAiTile,
+              },
+            });
+
+            // Update game - AI has played, now it's human's turn
+            await prisma.game.update({
+              where: { id: gameId },
+              data: {
+                currentRound: game.currentRound + 1,
+                currentTurn: session.userId,
+              },
+            });
+
+            return NextResponse.json({
+              success: true,
+              roundComplete: true,
+              gameComplete: false,
+              roundWinner: roundWinnerId,
+              nextRoundAiMove: {
+                tileNumber: nextAiTile,
+              },
+            });
+          }
+        }
+
         await prisma.game.update({
           where: { id: gameId },
           data: {
@@ -233,31 +289,7 @@ export async function POST(
       // For AI games, immediately generate AI move
       if (game.gameMode === "AI" && opponentId === null) {
         // AI's turn - generate and process AI move
-        const aiUsedTiles = getUsedTiles(allMoves, "AI");
-        const aiRemainingTiles = getRemainingTiles(aiUsedTiles);
-
-        if (aiRemainingTiles.length === 0) {
-          throw new Error("AI has no remaining tiles");
-        }
-
-        const aiTileNumber = generateAIMove(aiRemainingTiles);
-
-        // Create AI move (using player1Id as AI since player2Id is null for AI games)
-        // Actually, we need to handle this differently - AI moves should use a consistent identifier
-        // For AI games, the opponent is conceptually "AI" but we need to track moves
-        // Let's use the fact that in AI games, there's only one human player
-
-        // Wait, looking at the schema, Move requires a valid userId reference
-        // For AI games, we need to rethink this. Let me check the original plan...
-
-        // Actually, the issue is that AI games have player2Id = null
-        // But Move.playerId must reference a valid User
-        // We need to either:
-        // 1. Create an AI user in the database
-        // 2. Store AI moves differently
-        // 3. Reconsider the schema
-
-        // For now, let's create a system AI user if it doesn't exist
+        // First, get or create the AI user
         let aiUser = await prisma.user.findUnique({
           where: { email: "ai@system.local" },
         });
@@ -271,6 +303,16 @@ export async function POST(
             },
           });
         }
+
+        // Now get AI's used tiles with the correct user ID
+        const aiUsedTiles = getUsedTiles(allMoves, aiUser.id);
+        const aiRemainingTiles = getRemainingTiles(aiUsedTiles);
+
+        if (aiRemainingTiles.length === 0) {
+          throw new Error("AI has no remaining tiles");
+        }
+
+        const aiTileNumber = generateAIMove(aiRemainingTiles);
 
         // Create AI move
         await prisma.move.create({

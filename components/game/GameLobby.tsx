@@ -14,6 +14,7 @@ interface Game {
   opponent: {
     id: string;
     email: string;
+    username: string;
   } | null;
   isMyTurn: boolean;
   createdAt: string;
@@ -28,6 +29,7 @@ export function GameLobby() {
   const [games, setGames] = useState<Game[]>([]);
   const [loadingGames, setLoadingGames] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showAllGames, setShowAllGames] = useState(false);
 
   // Load user's games
   useEffect(() => {
@@ -202,7 +204,7 @@ export function GameLobby() {
                   value={roomCode}
                   onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
                   onKeyPress={(e) => e.key === "Enter" && joinGame()}
-                  className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg font-mono text-lg uppercase focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg font-mono text-lg uppercase focus:outline-none focus:border-blue-500 text-black"
                   maxLength={6}
                   disabled={joiningGame}
                 />
@@ -219,10 +221,10 @@ export function GameLobby() {
           </Card>
         </div>
 
-        {/* My Games Section */}
+        {/* Game History Section */}
         <Card>
           <CardHeader>
-            <h2 className="text-2xl font-bold text-gray-800">Your Games</h2>
+            <h2 className="text-2xl font-bold text-gray-800">Game History</h2>
           </CardHeader>
           <CardContent>
             {loadingGames ? (
@@ -235,49 +237,61 @@ export function GameLobby() {
                 <p className="text-gray-500 text-lg">No games yet. Create or join one!</p>
               </div>
             ) : (
-              <div className="space-y-3">
-                {games.map((game) => (
-                  <div
-                    key={game.id}
-                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
-                    onClick={() => router.push(`/game/${game.id}`)}
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-1">
-                        <span className="font-mono font-bold text-gray-800">
-                          {game.roomCode}
-                        </span>
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusBadge(game.status)}`}
-                        >
-                          {game.status}
-                        </span>
-                        <span className="text-sm text-gray-600">
-                          {game.gameMode === "AI" ? "🤖 AI" : "👥 Multiplayer"}
-                        </span>
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        vs {game.opponent?.email || "Waiting for opponent..."}
-                        {game.status === "IN_PROGRESS" && (
-                          <span className="ml-2">
-                            • Round {game.currentRound}/9
-                            {game.isMyTurn && (
-                              <span className="text-green-600 font-semibold ml-1">
-                                • Your turn!
-                              </span>
-                            )}
+              <>
+                <div className="space-y-3">
+                  {(showAllGames ? games : games.slice(0, 3)).map((game) => (
+                    <div
+                      key={game.id}
+                      className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                      onClick={() => router.push(`/game/${game.id}`)}
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3 mb-1">
+                          <span className="font-mono font-bold text-gray-800">
+                            {game.roomCode}
                           </span>
-                        )}
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusBadge(game.status)}`}
+                          >
+                            {game.status}
+                          </span>
+                          <span className="text-sm text-gray-600">
+                            {game.gameMode === "AI" ? "🤖 AI" : "👥 Multiplayer"}
+                          </span>
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          vs {game.opponent?.username || "Waiting for opponent..."}
+                          {game.status === "IN_PROGRESS" && (
+                            <span className="ml-2">
+                              • Round {game.currentRound}/9
+                              {game.isMyTurn && (
+                                <span className="text-green-600 font-semibold ml-1">
+                                  • Your turn!
+                                </span>
+                              )}
+                            </span>
+                          )}
+                        </div>
                       </div>
+                      <Button variant="outline" size="sm">
+                        {game.status === "COMPLETED" || game.status === "ABANDONED"
+                          ? "View"
+                          : "Play"}
+                      </Button>
                     </div>
-                    <Button variant="outline" size="sm">
-                      {game.status === "COMPLETED" || game.status === "ABANDONED"
-                        ? "View"
-                        : "Play"}
+                  ))}
+                </div>
+                {games.length > 3 && (
+                  <div className="mt-4 text-center">
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowAllGames(!showAllGames)}
+                    >
+                      {showAllGames ? "Show Less" : `Show More (${games.length - 3} more)`}
                     </Button>
                   </div>
-                ))}
-              </div>
+                )}
+              </>
             )}
           </CardContent>
         </Card>

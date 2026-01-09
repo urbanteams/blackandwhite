@@ -20,10 +20,10 @@ export async function GET(request: NextRequest) {
       },
       include: {
         player1: {
-          select: { id: true, email: true },
+          select: { id: true, email: true, username: true },
         },
         player2: {
-          select: { id: true, email: true },
+          select: { id: true, email: true, username: true },
         },
         moves: {
           select: { id: true, round: true },
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
       const isPlayer1 = game.player1Id === session.userId;
       const opponent =
         game.gameMode === "AI"
-          ? { id: "AI", email: "AI Opponent" }
+          ? { id: "AI", email: "AI Opponent", username: "AI Opponent" }
           : isPlayer1
             ? game.player2
             : game.player1;
@@ -54,6 +54,7 @@ export async function GET(request: NextRequest) {
           ? {
               id: opponent.id,
               email: opponent.email,
+              username: opponent.username || opponent.email,
             }
           : null,
         isMyTurn: game.currentTurn === session.userId,
