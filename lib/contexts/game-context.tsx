@@ -17,11 +17,13 @@ interface GameState {
     player1: {
       id: string;
       email: string;
+      username: string;
       isMe: boolean;
     } | null;
     player2: {
       id: string;
       email: string;
+      username: string;
       isMe: boolean;
     } | null;
   };
