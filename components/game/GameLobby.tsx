@@ -136,7 +136,7 @@ export function GameLobby() {
           <div className="text-center">
             <h1 className="text-5xl font-bold text-gray-800 mb-4">Black & White</h1>
             <p className="text-xl text-gray-600">
-              A strategic tile game from "The Genius"
+              A game of pure psychology
             </p>
           </div>
         </div>
@@ -305,10 +305,10 @@ export function GameLobby() {
             <ul className="space-y-2 text-gray-700">
               <li>• Each player has tiles numbered 0-8 (even = black, odd = white)</li>
               <li>• Starting player chooses a tile, opponent sees only the COLOR</li>
-              <li>• Both tiles are revealed - higher number wins the round</li>
+              <li>• Whoever played the higher number wins the round, then leads the next round</li>
               <li>• Used tiles are removed from both players</li>
-              <li>• Game lasts 9 rounds, most points wins</li>
-              <li>• You have 60 seconds per move or you forfeit</li>
+              <li>• The game lasts 9 rounds and whoever has the most points at the end wins</li>
+              <li>• You have 60 seconds per move or you automatically forfeit</li>
             </ul>
           </CardContent>
         </Card>
