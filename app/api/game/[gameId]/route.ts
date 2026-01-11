@@ -92,21 +92,14 @@ export async function GET(
     const myMove = currentRoundMoves.find((m) => m.playerId === myId);
     const opponentMove = currentRoundMoves.find((m) => m.playerId !== myId);
 
-    // Sanitize opponent move - only show color if round is not complete
+    // Sanitize opponent move - never show tile number during active game
+    // Tile numbers are only revealed in completedRounds when game is finished
     let sanitizedOpponentMove = null;
     if (opponentMove) {
-      if (currentRoundMoves.length < 2) {
-        // Round not complete - hide opponent's tile number, only show color
-        sanitizedOpponentMove = {
-          color: getTileColor(opponentMove.tileNumber),
-        };
-      } else {
-        // Round complete - show full tile
-        sanitizedOpponentMove = {
-          tileNumber: opponentMove.tileNumber,
-          color: getTileColor(opponentMove.tileNumber),
-        };
-      }
+      // Only show color, never the tile number during active rounds
+      sanitizedOpponentMove = {
+        color: getTileColor(opponentMove.tileNumber),
+      };
     }
 
     // Get completed rounds

@@ -303,12 +303,13 @@ export function GameLobby() {
           </CardHeader>
           <CardContent>
             <ul className="space-y-2 text-gray-700">
-              <li>• Each player has tiles numbered 0-8 (even = black, odd = white)</li>
-              <li>• Starting player chooses a tile, opponent sees only the COLOR</li>
+              <li>• Each player has nine tiles numbered 0-8 (even = black, odd = white)</li>
+              <li>• The starting player chooses a tile, but their opponent will only get to see its color before playing their own tile</li>
               <li>• Whoever played the higher number wins the round, then leads the next round</li>
               <li>• Used tiles are removed from both players</li>
               <li>• The game lasts 9 rounds and whoever has the most points at the end wins</li>
               <li>• You have 60 seconds per move or you automatically forfeit</li>
+              <li>• TIP: You learn more, win or lose, if you play the 5 tile first - but be careful doing this against someone who knows you know this!</li>
             </ul>
           </CardContent>
         </Card>
