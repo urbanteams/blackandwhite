@@ -83,27 +83,27 @@ export async function POST(
     const currentRoundMoves = game.moves.filter(
       (m) => m.round === game.currentRound
     );
-    if (currentRoundMoves.length > 0) {
-      const lastMoveTime = Math.max(
-        ...currentRoundMoves.map((m) => m.createdAt.getTime())
+    // Check timeout based on last move in round, or game update time if no moves yet
+    const lastMoveTime =
+      currentRoundMoves.length > 0
+        ? Math.max(...currentRoundMoves.map((m) => m.createdAt.getTime()))
+        : game.updatedAt.getTime();
+    const elapsed = Date.now() - lastMoveTime;
+    if (elapsed > 60000) {
+      // 60 seconds timeout
+      // Current player timed out - opponent wins
+      const opponentId = isPlayer1 ? game.player2Id : game.player1Id;
+      await prisma.game.update({
+        where: { id: gameId },
+        data: {
+          status: "COMPLETED",
+          winnerId: opponentId,
+        },
+      });
+      return NextResponse.json(
+        { error: "Move timeout. You lost the game." },
+        { status: 400 }
       );
-      const elapsed = Date.now() - lastMoveTime;
-      if (elapsed > 60000) {
-        // 60 seconds timeout
-        // Current player timed out - opponent wins
-        const opponentId = isPlayer1 ? game.player2Id : game.player1Id;
-        await prisma.game.update({
-          where: { id: gameId },
-          data: {
-            status: "COMPLETED",
-            winnerId: opponentId,
-          },
-        });
-        return NextResponse.json(
-          { error: "Move timeout. You lost the game." },
-          { status: 400 }
-        );
-      }
     }
 
     // Validate tile hasn't been used
