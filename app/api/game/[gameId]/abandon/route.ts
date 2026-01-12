@@ -44,7 +44,23 @@ export async function POST(
     }
 
     // Determine opponent (winner by forfeit)
-    const opponentId = isPlayer1 ? game.player2Id : game.player1Id;
+    let opponentId = isPlayer1 ? game.player2Id : game.player1Id;
+
+    // For AI games, get the AI user ID if opponentId is null
+    if (game.gameMode === "AI" && !opponentId) {
+      let aiUser = await prisma.user.findUnique({
+        where: { email: "ai@system.local" },
+      });
+      if (!aiUser) {
+        aiUser = await prisma.user.create({
+          data: {
+            email: "ai@system.local",
+            password: "NOT_A_REAL_PASSWORD",
+          },
+        });
+      }
+      opponentId = aiUser.id;
+    }
 
     // Update game - mark as abandoned with opponent as winner
     await prisma.game.update({

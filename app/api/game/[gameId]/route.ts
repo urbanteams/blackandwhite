@@ -144,21 +144,37 @@ export async function GET(
       // Check if timeout occurred - auto-forfeit current player
       if (elapsed > 60000) {
         // Current player timed out - opponent wins
-        const opponentId = game.currentTurn === game.player1Id
+        let timeoutOpponentId = game.currentTurn === game.player1Id
           ? game.player2Id
           : game.player1Id;
+
+        // For AI games, get the AI user ID if opponentId is null
+        if (isAIGame && !timeoutOpponentId) {
+          let aiUser = await prisma.user.findUnique({
+            where: { email: "ai@system.local" },
+          });
+          if (!aiUser) {
+            aiUser = await prisma.user.create({
+              data: {
+                email: "ai@system.local",
+                password: "NOT_A_REAL_PASSWORD",
+              },
+            });
+          }
+          timeoutOpponentId = aiUser.id;
+        }
 
         await prisma.game.update({
           where: { id: gameId },
           data: {
             status: "COMPLETED",
-            winnerId: opponentId,
+            winnerId: timeoutOpponentId,
           },
         });
 
         // Update the game object for the response
         game.status = "COMPLETED";
-        game.winnerId = opponentId;
+        game.winnerId = timeoutOpponentId;
         timeRemaining = 0;
       }
     }

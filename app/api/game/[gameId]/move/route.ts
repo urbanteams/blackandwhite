@@ -92,7 +92,24 @@ export async function POST(
     if (elapsed > 60000) {
       // 60 seconds timeout
       // Current player timed out - opponent wins
-      const opponentId = isPlayer1 ? game.player2Id : game.player1Id;
+      let opponentId = isPlayer1 ? game.player2Id : game.player1Id;
+
+      // For AI games, get the AI user ID
+      if (game.gameMode === "AI" && !opponentId) {
+        let aiUser = await prisma.user.findUnique({
+          where: { email: "ai@system.local" },
+        });
+        if (!aiUser) {
+          aiUser = await prisma.user.create({
+            data: {
+              email: "ai@system.local",
+              password: "NOT_A_REAL_PASSWORD",
+            },
+          });
+        }
+        opponentId = aiUser.id;
+      }
+
       await prisma.game.update({
         where: { id: gameId },
         data: {
