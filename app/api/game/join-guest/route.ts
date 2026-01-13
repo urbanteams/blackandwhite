@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createSession } from "@/lib/auth";
-import { hash } from "bcryptjs";
+import { hash } from "bcrypt";
 
 // Generate a random guest username
 function generateGuestUsername(): string {
