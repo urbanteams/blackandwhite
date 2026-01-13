@@ -200,7 +200,7 @@ export function GameLobby() {
               <div className="space-y-3">
                 <input
                   type="text"
-                  placeholder="Enter room code"
+                  placeholder="XXXXXX"
                   value={roomCode}
                   onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
                   onKeyPress={(e) => e.key === "Enter" && joinGame()}
@@ -234,7 +234,7 @@ export function GameLobby() {
               <li>• Used tiles are removed from both players</li>
               <li>• The game lasts 9 rounds and whoever has the most points at the end wins</li>
               <li>• You have 60 seconds per move or you automatically forfeit</li>
-              <li>• TIP: You learn more, win or lose, if you play the 5 tile first - but be careful doing this against someone who knows you know this!</li>
+              <li>• TIP: You learn more, win or lose, if you play the 4 tile first - but be careful doing this against someone who knows you know this!</li>
             </ul>
           </CardContent>
         </Card>
