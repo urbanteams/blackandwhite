@@ -10,6 +10,7 @@ import {
   getRemainingTiles,
 } from "@/lib/game/game-logic";
 import { generateAIMove } from "@/lib/game/ai-opponent";
+import { cleanupOldGames } from "@/lib/game/game-cleanup";
 
 export async function POST(
   request: NextRequest,
@@ -117,6 +118,12 @@ export async function POST(
           winnerId: opponentId,
         },
       });
+
+      // Clean up old games for this user (non-blocking)
+      cleanupOldGames(session.userId).catch((err) =>
+        console.error("Cleanup error:", err)
+      );
+
       return NextResponse.json(
         { error: "Move timeout. You lost the game." },
         { status: 400 }
@@ -224,6 +231,11 @@ export async function POST(
             winnerId: gameWinnerId,
           },
         });
+
+        // Clean up old games for this user (non-blocking)
+        cleanupOldGames(session.userId).catch((err) =>
+          console.error("Cleanup error:", err)
+        );
 
         return NextResponse.json({
           success: true,
@@ -398,6 +410,11 @@ export async function POST(
               winnerId: gameWinnerId,
             },
           });
+
+          // Clean up old games for this user (non-blocking)
+          cleanupOldGames(session.userId).catch((err) =>
+            console.error("Cleanup error:", err)
+          );
 
           return NextResponse.json({
             success: true,

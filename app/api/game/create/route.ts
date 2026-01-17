@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { generateRoomCode } from "@/lib/game/game-logic";
+import { cleanupOldGames } from "@/lib/game/game-cleanup";
 
 export async function POST(request: NextRequest) {
   try {
@@ -38,6 +39,11 @@ export async function POST(request: NextRequest) {
         currentRound: 1,
       },
     });
+
+    // Clean up old games for this user (non-blocking)
+    cleanupOldGames(session.userId).catch((err) =>
+      console.error("Cleanup error:", err)
+    );
 
     return NextResponse.json(
       {

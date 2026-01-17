@@ -242,7 +242,7 @@ export function GameLobby() {
         {/* Game History Section */}
         <Card>
           <CardHeader>
-            <h2 className="text-2xl font-bold text-gray-800">Game History</h2>
+            <h2 className="text-2xl font-bold text-gray-800">Last 3 Games</h2>
           </CardHeader>
           <CardContent>
             {loadingGames ? (

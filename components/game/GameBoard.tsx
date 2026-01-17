@@ -7,6 +7,7 @@ import { ScoreDisplay } from "./ScoreDisplay";
 import { GameTimer } from "./GameTimer";
 import { TurnIndicator } from "./TurnIndicator";
 import { RoundHistory } from "./RoundHistory";
+import { ChatSidebar } from "./ChatSidebar";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 
@@ -83,6 +84,7 @@ export function GameBoard() {
 
   const isGameOver = game.status === "COMPLETED" || game.status === "ABANDONED";
   const canMove = playerState.isMyTurn && !currentRoundMoves.myMove && !isGameOver && !submitting;
+  const isMultiplayer = game.gameMode === "MULTIPLAYER";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-8 px-4">
@@ -118,7 +120,7 @@ export function GameBoard() {
           </Card>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className={`grid grid-cols-1 gap-6 ${isMultiplayer ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}>
           {/* Left Column - Game Info */}
           <div className="space-y-6">
             <ScoreDisplay
@@ -170,6 +172,15 @@ export function GameBoard() {
           <div>
             <RoundHistory completedRounds={completedRounds} gameComplete={isGameOver} />
           </div>
+
+          {/* Far Right Column - Chat (Multiplayer only) */}
+          {isMultiplayer && (
+            <div className="lg:row-span-1">
+              <div className="sticky top-8 h-[600px]">
+                <ChatSidebar gameId={game.id} isMultiplayer={isMultiplayer} />
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

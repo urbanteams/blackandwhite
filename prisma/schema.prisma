@@ -20,9 +20,10 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  player1Games Game[]  @relation("Player1Games")
-  player2Games Game[]  @relation("Player2Games")
+  player1Games Game[]        @relation("Player1Games")
+  player2Games Game[]        @relation("Player2Games")
   moves        Move[]
+  chatMessages ChatMessage[]
 }
 
 model Game {
@@ -38,9 +39,10 @@ model Game {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  player1       User     @relation("Player1Games", fields: [player1Id], references: [id], onDelete: Cascade)
-  player2       User?    @relation("Player2Games", fields: [player2Id], references: [id], onDelete: Cascade)
+  player1       User          @relation("Player1Games", fields: [player1Id], references: [id], onDelete: Cascade)
+  player2       User?         @relation("Player2Games", fields: [player2Id], references: [id], onDelete: Cascade)
   moves         Move[]
+  chatMessages  ChatMessage[]
 
   @@index([roomCode])
   @@index([status])
@@ -61,4 +63,18 @@ model Move {
 
   @@index([gameId, round])
   @@index([playerId])
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  gameId    String
+  userId    String
+  message   String
+  createdAt DateTime @default(now())
+
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([gameId, createdAt])
+  @@index([userId])
 }

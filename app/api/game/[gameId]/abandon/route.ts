@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { cleanupOldGames } from "@/lib/game/game-cleanup";
 
 export async function POST(
   request: NextRequest,
@@ -70,6 +71,11 @@ export async function POST(
         winnerId: opponentId, // Opponent wins by forfeit
       },
     });
+
+    // Clean up old games for this user (non-blocking)
+    cleanupOldGames(session.userId).catch((err) =>
+      console.error("Cleanup error:", err)
+    );
 
     return NextResponse.json({
       success: true,
