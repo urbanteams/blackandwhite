@@ -179,7 +179,7 @@ export function ChatSidebar({ gameId, isMultiplayer }: ChatSidebarProps) {
               {error}
             </div>
           )}
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
             <input
               ref={inputRef}
               type="text"
@@ -188,12 +188,12 @@ export function ChatSidebar({ gameId, isMultiplayer }: ChatSidebarProps) {
               placeholder="Type a message..."
               maxLength={500}
               disabled={sending}
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm text-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+              className="flex-1 min-w-0 px-3 py-2 border border-gray-300 rounded-lg text-sm text-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
             />
             <Button
               type="submit"
               disabled={!newMessage.trim() || sending}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+              className="flex-shrink-0 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors text-sm font-medium"
             >
               {sending ? "..." : "Send"}
             </Button>

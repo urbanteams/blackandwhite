@@ -120,8 +120,8 @@ export function GameBoard() {
           </Card>
         )}
 
-        <div className={`grid grid-cols-1 gap-6 ${isMultiplayer ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}>
-          {/* Left Column - Game Info */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Game Info and Chat */}
           <div className="space-y-6">
             <ScoreDisplay
               myScore={playerState.myScore}
@@ -143,6 +143,13 @@ export function GameBoard() {
               >
                 Forfeit Game
               </Button>
+            )}
+
+            {/* Chat (Multiplayer only) - Moved under Game Info */}
+            {isMultiplayer && (
+              <div className="h-[500px]">
+                <ChatSidebar gameId={game.id} isMultiplayer={isMultiplayer} />
+              </div>
             )}
           </div>
 
@@ -172,15 +179,6 @@ export function GameBoard() {
           <div>
             <RoundHistory completedRounds={completedRounds} gameComplete={isGameOver} />
           </div>
-
-          {/* Far Right Column - Chat (Multiplayer only) */}
-          {isMultiplayer && (
-            <div className="lg:row-span-1">
-              <div className="sticky top-8 h-[600px]">
-                <ChatSidebar gameId={game.id} isMultiplayer={isMultiplayer} />
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
